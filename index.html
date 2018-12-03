@@ -38,10 +38,16 @@
 									<input type="number" id="id" placeholder="Matricula" class="form-control"> <!--type="number" cambio por "text"-->
 								</div>
 								<div class="form-group">
-									<input type="text" id="name" placeholder="Nombre" class="form-control">
+									<input type="text" id="nombre" placeholder="Nombre" class="form-control">
 								</div>
 								<div class="form-group">
-									<input placeholder="Materia" id="description" class="form-control">
+									<input placeholder="Curso" id="curso" class="form-control">
+								</div>
+								<div class="form-group">
+									<input placeholder="Asesor" id="asesor" class="form-control">
+								</div>
+								<div class="form-group">
+									<input placeholder="Salón" id="salon" class="form-control">
 								</div>
 								<div class="form-group">
 									<button  class="btn btn-info" onclick="insertAlumno()" >
@@ -56,10 +62,11 @@
 						<table class="table table-bordered text-center table-hover table-dark">
 							<thead class="thead">
 								<tr>
+									<th>Matrícula</th>
 									<th>Nombre</th>
-									<th>Descripción</th>
-									<th></th>
-									<th></th>
+									<th>Curso</th>
+									<th>Asesor</th>
+									<th>Salón</th>
 								</tr>
 							</thead>
 							<tbody id="tbody-tabla-alumno"></tbody> <!--loadTask cambio por "loadTask"-->
@@ -94,57 +101,58 @@
 		  }
 
 		  function innerHTML(id,result){
-		  	return document.getElementById(id).innerHTML+=result
+		  	return document.getElementById(id).innerHTML += result
 		  }
 
-		  function arrayJSON(name,description){
-		  	var data = {
-		  		name:name,
-		  		description:description
-		  	}
+		  function arrayJSON(nombre, curso, asesor, salon){
+		  	var data = { nombre, curso, asesor, salon }
 		  	return data;
 		  }/*Almadenamiento*/
 
 		  function insertAlumno(){ //insertTask()
 		  	var id = getID("id")
-		  	var name = getID("name")
-		  	var description = getID("description")
-		  	console.log(name + description)
-		  	if(id.length==0 || name.length==0 || description.name==0){
+		  	var nombre = getID("nombre")
+		  	var curso = getID("curso")
+		  	var asesor = getID("asesor")
+		  	var salon = getID("salon")
+		  	console.log(nombre + curso + asesor + salon)
+		  	if(id.length==0 || nombre.length==0 || curso.nombre==0 || asesor.nombre==0 || salon.nombre==0){
 		  		alert('No puedes dejar ningun campo vacio')
 		  	}else{
-		  		var arrayData= arrayJSON(name,description)
+		  		var arrayData= arrayJSON(nombre, curso, asesor, salon)
 		  		var alumno = firebase.database().ref("alumno/"+id)/*Instertar datos---> task y datos---->task*/
 		  		alumno.set(arrayData)/*Inserta lo datos que hay arrayData*/
 		  		alert('Alumnos Guardado Correctamente')/*Aletar de guardado*/
 		  		vaciarInput("id","")
-		  		vaciarInput("name","")
-		  		vaciarInput("description","")
-
+		  		vaciarInput("nombre","")
+		  		vaciarInput("curso","")
+		  		vaciarInput("asesor","")
+		  		vaciarInput("salon","")
 		  	}
 		  }
-		  function table(name,description){
-		  	return '<tr>'+
-		  	'<td>'+name+'</td>'+
-		  	'<td>'+description+'</td>'+
-		  	'<td><td>'+
-		  	'<td><td>'+
-		  	'</tr>'
-
+		  function table(id, nombre, curso, asesor, salon){
+		  	return `
+					<tr>
+						<td>${id}</td>
+						<td>${nombre}</td>
+						<td>${curso}</td>
+						<td>${asesor}</td>
+						<td>${salon}</td>
+					</tr>
+				`
 		  }
 
 		  function verAlumnos(){
+				let result = '';
 		  	var conexion = firebase.database().ref("alumno")
-		  	conexion.on('clid_added', function(data){
-		  		var alumnoValue = data.val()
-		  		var result = table(alumnoValue.name,alumnoValue.description)
-		  		innerHTML('#tbody-tabla-alumno',result)
-
+		  	conexion.on('value', function(data){
+					data.forEach(d => {
+						const alumno = d.val()
+						result += table(d.key,alumno.nombre,alumno.curso,alumno.asesor,alumno.salon)
+					})
+					innerHTML('tbody-tabla-alumno',result)
 		  	});
 		  }
-
-
 	    </script>
-	
 	</body>
-	</html>
+</html>
