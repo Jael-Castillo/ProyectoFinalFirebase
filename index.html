@@ -23,7 +23,7 @@
 		<body onload="verAlumnos()">
 		<div class="jumbotron text-center">
 		  <h1 style="font-family: 'Patua One', cursive;">Bienvenido</h1>
-		  <p style="font-family: 'Signika', sans-serif;">Ingresa tus datos como alumno y la materia a la que quieres asistir</p>
+		  <p style="font-family: 'Signika', sans-serif;">Precio de Alimentos</p>
 		</div>
 			<div class="container">
 				<div class="row mt-4">
@@ -31,24 +31,16 @@
 						<div class="card">
 							<div class="card-body">
 								<div class="card-title">
-									<h5>Datos de Alumnos</h5>
+									<h5>Datos de Alimento</h5>
 								</div>
 								<div class="form-group"><hr></div>
 								<div class="form-group">
-									<input type="number" id="id" placeholder="Matricula" class="form-control"> <!--type="number" cambio por "text"-->
+									<input type="number" id="precio" placeholder="Precio" class="form-control"> 
 								</div>
 								<div class="form-group">
 									<input type="text" id="nombre" placeholder="Nombre" class="form-control">
 								</div>
-								<div class="form-group">
-									<input placeholder="Curso" id="curso" class="form-control">
-								</div>
-								<div class="form-group">
-									<input placeholder="Asesor" id="asesor" class="form-control">
-								</div>
-								<div class="form-group">
-									<input placeholder="Salón" id="salon" class="form-control">
-								</div>
+								<input type="text" id="id" hidden>
 								<div class="form-group">
 									<button  class="btn btn-info" onclick="insertAlumno()" >
 										<i class="fas fa-plus-circle"></i>Agregar
@@ -62,15 +54,12 @@
 						<table class="table table-bordered text-center table-hover table-dark">
 							<thead class="thead">
 								<tr>
-									<th>Matrícula</th>
+									<th>Precio</th>
 									<th>Nombre</th>
-									<th>Curso</th>
-									<th>Asesor</th>
-									<th>Salón</th>
 									<th>Acciones</th>
 								</tr>
 							</thead>
-							<tbody id="tbody-tabla-alumno"></tbody> <!--loadTask cambio por "loadTask"-->
+							<tbody id="tbody-tabla-food"></tbody> <!--loadTask cambio por "loadTask"-->
 						</table>
 					</div>
 				</div>
@@ -105,72 +94,64 @@
 		  	return document.getElementById(id).innerHTML = result
 		  }
 
-		  function arrayJSON(nombre, curso, asesor, salon){
-		  	var data = { nombre, curso, asesor, salon }
+		  function arrayJSON(precio, nombre){
+		  	var data = { precio, nombre }
 		  	return data;
-		  }/*Almadenamiento*/
+		  }
 
 		  function insertAlumno(){ //insertTask()
 		  	var id = getID("id")
+		  	var precio = getID("precio")
 		  	var nombre = getID("nombre")
-		  	var curso = getID("curso")
-		  	var asesor = getID("asesor")
-		  	var salon = getID("salon")
-		  	console.log(nombre + curso + asesor + salon)
-		  	if(id.length==0 || nombre.length==0 || curso.nombre==0 || asesor.nombre==0 || salon.nombre==0){
+		  	if(precio.length==0 || nombre.length==0){
 		  		alert('No puedes dejar ningun campo vacio')
 		  	}else{
-		  		var arrayData= arrayJSON(nombre, curso, asesor, salon)
-		  		var alumno = firebase.database().ref("alumno/"+id)/*Instertar datos---> task y datos---->task*/
-		  		alumno.set(arrayData)/*Inserta lo datos que hay arrayData*/
-		  		alert('Alumnos Guardado Correctamente')/*Aletar de guardado*/
+		  		var arrayData= arrayJSON(precio, nombre)
+					if (! id) id = firebase.database().ref().child('food').push().key;
+		  		var food = firebase.database().ref("food/"+id)/*Instertar datos---> task y datos---->task*/
+		  		food.set(arrayData)/*Inserta lo datos que hay arrayData*/
+		  		alert('Alimento Guardado Correctamente')/*Aletar de guardado*/
 		  		vaciarInput("id","")
+		  		vaciarInput("precio","")
 		  		vaciarInput("nombre","")
-		  		vaciarInput("curso","")
-		  		vaciarInput("asesor","")
-		  		vaciarInput("salon","")
 		  	}
 		  }
-		  function table(id, nombre, curso, asesor, salon){
+		  function table(id, precio, nombre){
 		  	return `
 					<tr>
-						<td>${id}</td>
+						<td>${precio}</td>
 						<td>${nombre}</td>
-						<td>${curso}</td>
-						<td>${asesor}</td>
-						<td>${salon}</td>
 						<td>
-							<i class="fas fa-pen-square" onclick="editTask('${id}','${nombre}','${curso}','${asesor}','${salon}')"></i>
-							<i class="fas fa-trash" onclick="deleteTask(${id})"></i>
+							<i class="fas fa-pen-square" onclick="editTask('${id}', '${precio}','${nombre}')"></i>
+							<i class="fas fa-trash" onclick="deleteTask('${id}','${nombre}')"></i>
 						</td>
 					</tr>
 				`
 		  }
 
 		  function verAlumnos(){
-		  	var conexion = firebase.database().ref("alumno")
+		  	var conexion = firebase.database().ref("food")
 		  	conexion.on('value', function(data){
 					let result =  '';
 					data.forEach(d => {
-						const alumno = d.val()
-						result += table(d.key,alumno.nombre,alumno.curso,alumno.asesor,alumno.salon)
+						const food = d.val()
+						result += table(d.key,food.precio,food.nombre)
 					})
-					innerHTML('tbody-tabla-alumno',result)
+					innerHTML('tbody-tabla-food',result)
 		  	});
 		  }
 
-			function editTask(id, nombre, curso, asesor, salon) {
+			function editTask(id, precio, nombre) {
 				vaciarInput('id', id)
 				vaciarInput('nombre', nombre)
-				vaciarInput('curso', curso)
-				vaciarInput('asesor', asesor)
-				vaciarInput('salon', salon)
+				vaciarInput('precio', precio)
 			}
 
-			function deleteTask(id) {
-				if(confirm(`¿Desea eliminar al alumno con boleta: ${id}?`)) {
-					var alumno = firebase.database().ref("alumno/"+id)
-					alumno.remove()
+			function deleteTask(id, nombre) {
+				if(confirm(`¿Desea eliminar el alimento: ${nombre}?`)) {
+					var food = firebase.database().ref("food/"+id)
+					food.remove()
+					alert('Alimento eliminado correctamente')
 				}
 			}
 	    </script>
