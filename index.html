@@ -67,6 +67,7 @@
 									<th>Curso</th>
 									<th>Asesor</th>
 									<th>Salón</th>
+									<th>Acciones</th>
 								</tr>
 							</thead>
 							<tbody id="tbody-tabla-alumno"></tbody> <!--loadTask cambio por "loadTask"-->
@@ -101,7 +102,7 @@
 		  }
 
 		  function innerHTML(id,result){
-		  	return document.getElementById(id).innerHTML += result
+		  	return document.getElementById(id).innerHTML = result
 		  }
 
 		  function arrayJSON(nombre, curso, asesor, salon){
@@ -138,14 +139,18 @@
 						<td>${curso}</td>
 						<td>${asesor}</td>
 						<td>${salon}</td>
+						<td>
+							<i class="fas fa-pen-square" onclick="editTask('${id}','${nombre}','${curso}','${asesor}','${salon}')"></i>
+							<i class="fas fa-trash" onclick="deleteTask(${id})"></i>
+						</td>
 					</tr>
 				`
 		  }
 
 		  function verAlumnos(){
-				let result =  'innerHTML(id, "")';
 		  	var conexion = firebase.database().ref("alumno")
 		  	conexion.on('value', function(data){
+					let result =  '';
 					data.forEach(d => {
 						const alumno = d.val()
 						result += table(d.key,alumno.nombre,alumno.curso,alumno.asesor,alumno.salon)
@@ -153,6 +158,21 @@
 					innerHTML('tbody-tabla-alumno',result)
 		  	});
 		  }
+
+			function editTask(id, nombre, curso, asesor, salon) {
+				vaciarInput('id', id)
+				vaciarInput('nombre', nombre)
+				vaciarInput('curso', curso)
+				vaciarInput('asesor', asesor)
+				vaciarInput('salon', salon)
+			}
+
+			function deleteTask(id) {
+				if(confirm(`¿Desea eliminar al alumno con boleta: ${id}?`)) {
+					var alumno = firebase.database().ref("alumno/"+id)
+					alumno.remove()
+				}
+			}
 	    </script>
 	</body>
 </html>
